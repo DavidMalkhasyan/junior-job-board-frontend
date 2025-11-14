@@ -1,0 +1,43 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 50px;
+  background-color: #fff;
+}
+
+.navbar__logo img {
+  height: 40px;
+  width: auto;
+  cursor: pointer;
+}
+
+.navbar__menu {
+  display: flex;
+  column-gap: 52px;
+}
+
+.navbar__menu-item {
+  color: #555;
+  font-weight: 400;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+.navbar__menu-item:hover {
+  color: #000;
+}
+
+.navbar__menu-item.active {
+  color: #000;
+  font-weight: 600;
+}
+
+
+
+.navbar__profile img {
+  height: 35px;
+  width: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+}
