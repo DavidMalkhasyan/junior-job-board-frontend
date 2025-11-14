@@ -1,0 +1,23 @@
+.searchbar {
+  display: flex;               /* flex to center input */
+  justify-content: center;     /* horizontal centering */
+  width: 100%;                 /* full width */
+  padding: 1rem;               /* optional padding */
+  box-sizing: border-box;
+}
+
+.searchbar__input {
+  width: 100%;                 /* flexible width */
+  max-width: 1300px;           /* maximum width */
+  padding: 0.75rem 1rem;       /* inner padding */
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.searchbar__input:focus {
+  border-color: #000;          /* highlight on focus */
+}
