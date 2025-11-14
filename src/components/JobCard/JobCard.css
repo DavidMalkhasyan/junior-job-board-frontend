@@ -1,0 +1,118 @@
+.jobcard {
+  width: 100%;
+  max-width: 364px;
+  max-width: 440px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+/* Header */
+.jobcard__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.jobcard__logo img {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: #ececec;
+}
+
+.jobcard__info {
+  flex: 1;
+  margin-left: 16px;
+}
+
+.jobcard__title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.jobcard__location {
+  font-size: 14px;
+  margin-top: 4px;
+  color: #007bff;
+}
+
+.jobcard__menu {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  padding: 4px;
+  color: #666;
+}
+
+/* Middle info */
+.jobcard__details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.jobcard__grade,
+.jobcard__worktype,
+.jobcard__salary {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Description */
+.jobcard__description {
+  font-size: 14px;
+  line-height: 1.5rem;
+  color: #555;
+  margin-top: 4px;
+}
+
+/* Skills */
+.jobcard__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.jobcard__skill-item {
+  padding: 6px 14px;
+  background: #f6f6f6;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #444;
+  font-weight: 500;
+}
+
+/* Bottom footer */
+.jobcard__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.jobcard__date {
+  font-size: 13px;
+  color: #888;
+}
+
+.jobcard__save {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: 0.2s;
+}
+
+.jobcard__save:hover {
+  opacity: 1;
+}
