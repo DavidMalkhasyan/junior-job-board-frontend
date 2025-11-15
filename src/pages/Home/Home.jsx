@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import SearchBar from "../../components/SearchBar/SearchBar";
-// import FilterPanel from "../../components/FilterPanel/FilterPanel";
 import jobs from "../../data/jobsMock";
 import JobCard from "../../components/JobCard/JobCard";
+import JobDetailModal from "../../components/JobDetailModal/JobDetailModal";
+
+// import FilterPanel from "../../components/FilterPanel/FilterPanel";  // Filter for future use
+
 import "./Home.css";
 export default function Home() {
     // ==========================
@@ -16,6 +19,9 @@ export default function Home() {
 
     //searchTerm: stores the current search input from the user
     const [searchTerm, setSearchTerm] = useState("");
+
+    // selectedJob:
+    const [selectedJob, setSelectedJob] = useState(null);
 
     // filters: stores all filter options selected by the user
     // location: current location filter
@@ -38,6 +44,12 @@ export default function Home() {
 
     // called when user types in the search bar
     const handleSearchChange = (term) => setSearchTerm(term);
+
+    // called when user clicks on a job card to view details
+    const handleOpenModal = (job) => setSelectedJob(job);
+
+    // called when user closes the job detail modal
+    const handleCloseModal = () => setSelectedJob(null);
 
     // called when user changes filter options in FilterPanel
     // merges new filters with previous state
@@ -68,15 +80,21 @@ export default function Home() {
                 <div className="home__filters">
                     <div>Filter</div>
                 </div>
-                
+
                 <div className="home__jobs">
                     <div className="job-listings">
-                        {jobs.map((job,i) => (
-                            <JobCard key={i} job={job} />
+                        {jobs.map((job, i) => (
+                            <div key={i} onClick={() => handleOpenModal(job)}>
+                                <JobCard job={job} />
+                            </div>
                         ))}
                     </div>
                 </div>
             </div>
+
+            {selectedJob && (
+                <JobDetailModal job={selectedJob} onClose={handleCloseModal} />
+            )}
         </div>
     );
 }
