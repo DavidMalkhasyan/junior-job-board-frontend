@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import JobCard from "../../components/JobCard/JobCard";
@@ -21,18 +21,18 @@ export default function Home() {
         skills: [],
     });
 
-    const [appliedFilters, setAppliedFilters] = useState(filters);
+    const [appliedFilters, setAppliedFilters] = useState({});
 
     // ==========================
     // BUILD URL FOR API REQUEST
     // ==========================
-    const buildJobsUrl = (filterObj) => {
+    const buildJobsUrl = (filterObj, search) => {
         let url = "/jobs?";
-        if (filterObj.language.length)
+        if (filterObj?.language?.length)
             url += `languages=${filterObj.language.join(",")}&`;
-        if (filterObj.seniority) url += `seniority=${filterObj.seniority}&`;
-        if (filterObj.category) url += `category=${filterObj.category}&`;
-        if (searchTerm) url += `search=${searchTerm}&`;
+        if (filterObj?.seniority) url += `seniority=${filterObj.seniority}&`;
+        if (filterObj?.category) url += `category=${filterObj.category}&`;
+        if (search) url += `search=${search}&`;
         url += "page=1";
         return url;
     };
@@ -40,20 +40,47 @@ export default function Home() {
     // ==========================
     // FETCH JOBS
     // ==========================
-    useEffect(() => {
-        const url = buildJobsUrl(appliedFilters);
-        api.get(url).then((response) => {
+    const fetchJobs = async (filterObj = {}, search = "") => {
+        try {
+            const url = buildJobsUrl(filterObj, search);
+            const response = await api.get(url);
             if (response.status === 200) {
-                setJobList(response.data);
+                let data = Object.values(response.data);
+                data.map((job) => {
+                    job.createdAt = new Date(
+                        job.createdAt
+                    ).toLocaleDateString();
+                    return job;
+                });
+                setJobList(data);
             }
-        });
-    }, [appliedFilters, searchTerm]);
+        } catch (err) {
+            console.error("Failed to fetch jobs:", err);
+        }
+    };
+
+    // ==========================
+    // INITIAL LOAD 
+    // ==========================
+    useEffect(() => {
+        fetchJobs();
+    }, []);
+
+    // ==========================
+    // SEARCH
+    // ==========================
+    useEffect(() => {
+        if (searchTerm.trim() !== "") {
+            fetchJobs(appliedFilters, searchTerm);
+        }
+    }, [searchTerm]);
 
     // ==========================
     // HANDLER FUNCTIONS
     // ==========================
     const handleSectionChange = (section) => setActiveSection(section);
     const handleSearchChange = (term) => setSearchTerm(term);
+
     const handleOpenModal = (job) => setSelectedJob(job);
     const handleCloseModal = () => setSelectedJob(null);
 
@@ -76,7 +103,8 @@ export default function Home() {
     };
 
     const handleApplyFilters = () => {
-        setAppliedFilters(filters); // применяем выбранные фильтры
+        setAppliedFilters({ ...filters });
+        fetchJobs(filters, searchTerm);
     };
 
     // ==========================
@@ -88,6 +116,7 @@ export default function Home() {
                 active={activeSection}
                 onChangeActive={handleSectionChange}
             />
+
             <div className="home__topbar">
                 <button className="home__post-job-btn">Post job</button>
                 <SearchBar value={searchTerm} onChange={handleSearchChange} />
@@ -97,7 +126,7 @@ export default function Home() {
                 <div className="home__filters">
                     <FilterPanel
                         filters={filters}
-                        jobList={jobList} 
+                        jobList={jobList}
                         onChangeFilter={handleFilterChange}
                     />
                     <button
@@ -109,8 +138,11 @@ export default function Home() {
                 </div>
 
                 <div className="home__jobs">
+                    <div className="">
+                        <h2>{jobList.length} Jobs Found </h2>
+                    </div>
                     <div className="job-listings">
-                        {jobList.length ? (
+                        {jobList?.length ? (
                             jobList.map((job, i) => (
                                 <div
                                     key={i}
@@ -120,7 +152,7 @@ export default function Home() {
                                 </div>
                             ))
                         ) : (
-                            <div>Loading jobs...</div>
+                            <div>No jobs found.</div>
                         )}
                     </div>
                 </div>
