@@ -144,3 +144,27 @@
 .jobcard__save:hover {
     opacity: 1;
 }
+
+.jobcard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.jobcard__save:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.jobcard__skill-item:hover {
+    background: #e0e0eb;
+    color: #555;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.jobcard__more:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
