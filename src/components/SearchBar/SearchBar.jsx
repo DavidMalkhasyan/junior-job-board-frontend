@@ -9,7 +9,7 @@ export default function SearchBar({ value, onChange, onSubmit }) {
                     className="searchbar__input"
                     placeholder="Search for jobs or profiles..."
                     value={value}
-                    onChange={onChange}
+                    onChange={(event) => onChange(event.target.value)}
                 />
                 <button className="searchbar__button" onClick={onSubmit}>
                     Search
