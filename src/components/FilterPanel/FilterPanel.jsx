@@ -2,18 +2,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { categories, languages, seniorityLevels, skillsMap } from "../../data/filterData";
 
 export default function FilterPanel({ filters, onChangeFilter, jobList }) {
-  // ==========================
-  // STATE
-  // ==========================
   const [selectedCategory, setSelectedCategory] = useState(filters.category || "");
-  const [selectedLanguage, setSelectedLanguage] = useState(filters.language || "");
+  const [selectedLanguage, setSelectedLanguage] = useState(filters.language[0] || "");
   const [selectedSeniority, setSelectedSeniority] = useState(filters.seniority || []);
   const [selectedSkills, setSelectedSkills] = useState(filters.skills || []);
   const [availableSkills, setAvailableSkills] = useState([]);
 
-  // ==========================
-  // EFFECTS
-  // ==========================
   useEffect(() => {
     if (selectedLanguage && selectedCategory) {
       const skillsForSelection = skillsMap[selectedLanguage]?.[selectedCategory];
@@ -27,17 +21,14 @@ export default function FilterPanel({ filters, onChangeFilter, jobList }) {
     }
   }, [selectedLanguage, selectedCategory]);
 
-  // ==========================
-  // COUNTS
-  // ==========================
   const getCounts = (items, field) => {
     const counts = {};
     if (!jobList || jobList.length === 0) return counts;
     items.forEach(item => {
       counts[item] = jobList.filter(job => {
-        if (field === "language") return job.language?.includes(item);
-        if (field === "category") return job.category === item;
-        if (field === "seniority") return job.seniority?.includes(item);
+        if (field === "language") return job.requiredLanguages?.includes(item);
+        if (field === "category") return job.category?.includes(item);
+        if (field === "seniority") return job.grade === item;
         if (field === "skills") return job.skills?.includes(item);
         return false;
       }).length;
@@ -50,9 +41,6 @@ export default function FilterPanel({ filters, onChangeFilter, jobList }) {
   const seniorityCounts = useMemo(() => getCounts(seniorityLevels, "seniority"), [jobList]);
   const skillsCounts = useMemo(() => getCounts(availableSkills, "skills"), [jobList, availableSkills]);
 
-  // ==========================
-  // HANDLERS
-  // ==========================
   const toggleSelection = (value, stateArray, setState) => {
     if (stateArray.includes(value)) {
       setState(stateArray.filter(v => v !== value));
@@ -74,8 +62,8 @@ export default function FilterPanel({ filters, onChangeFilter, jobList }) {
     <div className="filter-options">
       {items &&
         items.length > 0 &&
-        items.map(item => (
-          <label key={item} className="filter-checkbox">
+        items.map((item, idx) => (
+          <label key={`${item}-${idx}`} className="filter-checkbox">
             <input
               type="checkbox"
               checked={selected.includes(item)}
@@ -96,8 +84,8 @@ export default function FilterPanel({ filters, onChangeFilter, jobList }) {
       <div className="filter-field">
         <p className="filter-title">Category</p>
         <div className="filter-options">
-          {categories.map(cat => (
-            <label key={cat} className="filter-checkbox">
+          {categories.map((cat, idx) => (
+            <label key={`cat-${cat}-${idx}`} className="filter-checkbox">
               <input
                 type="radio"
                 name="category"
@@ -115,8 +103,8 @@ export default function FilterPanel({ filters, onChangeFilter, jobList }) {
       <div className="filter-field">
         <p className="filter-title">Language</p>
         <div className="filter-options">
-          {languages.map(lang => (
-            <label key={lang} className="filter-checkbox">
+          {languages.map((lang, idx) => (
+            <label key={`lang-${lang}-${idx}`} className="filter-checkbox">
               <input
                 type="radio"
                 name="language"
@@ -144,6 +132,9 @@ export default function FilterPanel({ filters, onChangeFilter, jobList }) {
         </div>
       )}
 
+      <button className="filter-apply-btn" onClick={handleApply}>
+        Apply
+      </button>
     </div>
   );
 }
