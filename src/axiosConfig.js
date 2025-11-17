@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create an axios instance
 const api = axios.create({
-  baseURL: "http://192.168.111.53:8080", 
+  baseURL: "https://hardware-cache-www-computation.trycloudflare.com", 
   headers: {
     "Content-Type": "application/json",
   },
