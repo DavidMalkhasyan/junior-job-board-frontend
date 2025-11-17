@@ -4,6 +4,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import JobCard from "../../components/JobCard/JobCard";
 import JobDetailModal from "../../components/JobDetailModal/JobDetailModal";
 import FilterPanel from "../../components/FilterPanel/FilterPanel";
+import PostJobForm from "../../components/CreateJobForm/CreateJobForm";
 import api from "../../axiosConfig";
 import "./Home.css";
 
@@ -12,12 +13,16 @@ export default function Home() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedJob, setSelectedJob] = useState(null);
     const [jobList, setJobList] = useState([]);
+    const [userData, setData] = useState(null);
+    const [role, setRole] = useState(localStorage.getItem("Role") || null);
+    const [showPostJobForm, setShowPostJobForm] = useState(false);
 
     const [filters, setFilters] = useState({
         category: "",
-        language: [],
-        seniority: "",
+        language: "",
+        seniority: [],
         skills: [],
+        salary: [null, null],
     });
 
     const [appliedFilters, setAppliedFilters] = useState({});
@@ -25,15 +30,29 @@ export default function Home() {
     // ==========================
     // BUILD URL FOR API REQUEST
     // ==========================
-    const buildJobsUrl = (filterObj, search) => {
-        let url = "/jobs?";
-        if (filterObj?.language?.length)
-            url += `languages=${filterObj.language.join(",")}&`;
-        if (filterObj?.seniority) url += `seniority=${filterObj.seniority}&`;
-        if (filterObj?.category) url += `category=${filterObj.category}&`;
-        if (search) url += `search=${search}&`;
-        url += "page=1";
-        return url;
+    const buildJobsUrl = (filterObj = {}, search = "") => {
+        const {
+            language = "",
+            seniority = [],
+            category = "",
+            skills = [],
+            salary = [null, null],
+        } = filterObj;
+
+        let params = [];
+        if (language) params.push(`language=${language.toLowerCase()}`);
+        if (seniority.length) params.push(`grade=${seniority.join(",")}`);
+        if (category) params.push(`category=${category}`);
+        if (skills.length) params.push(`skills=${skills.join(",")}`);
+        if (salary[0] !== null || salary[1] !== null) {
+            const min = salary[0] !== null ? salary[0] : "";
+            const max = salary[1] !== null ? salary[1] : "";
+            params.push(`salary=[${min},${max}]`);
+        }
+        if (search) params.push(`search=${search}`);
+        params.push("page=1");
+
+        return `/jobs?${params.join("&")}`;
     };
 
     // ==========================
@@ -42,6 +61,7 @@ export default function Home() {
     const fetchJobs = async (filterObj = {}, search = "") => {
         try {
             const url = buildJobsUrl(filterObj, search);
+            console.log("Fetching jobs with URL:", url);
             const response = await api.get(url);
             if (response.status === 200) {
                 let data = Object.values(response.data);
@@ -59,10 +79,17 @@ export default function Home() {
     };
 
     // ==========================
-    // INITIAL LOAD 
+    // INITIAL LOAD
     // ==========================
     useEffect(() => {
         fetchJobs();
+    }, []);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("Data");
+        if (storedUser) {
+            setData(JSON.parse(storedUser));
+        }
     }, []);
 
     // ==========================
@@ -83,27 +110,8 @@ export default function Home() {
     const handleOpenModal = (job) => setSelectedJob(job);
     const handleCloseModal = () => setSelectedJob(null);
 
-    const handleFilterChange = (type, value) => {
-        setFilters((prev) => {
-            const newFilters = { ...prev };
-            if (type === "language") {
-                if (prev.language.includes(value)) {
-                    newFilters.language = prev.language.filter(
-                        (l) => l !== value
-                    );
-                } else {
-                    newFilters.language.push(value);
-                }
-            } else {
-                newFilters[type] = value;
-            }
-            return newFilters;
-        });
-    };
-
-    const handleApplyFilters = () => {
-        setAppliedFilters({ ...filters });
-        fetchJobs(filters, searchTerm);
+    const handleApplyFilters = (appliedFilters) => {
+        fetchJobs(appliedFilters, searchTerm);
     };
 
     // ==========================
@@ -114,10 +122,19 @@ export default function Home() {
             <Navbar
                 active={activeSection}
                 onChangeActive={handleSectionChange}
+                userData={userData}
             />
 
             <div className="home__topbar">
-                <button className="home__post-job-btn">Post job</button>
+                {role === "company" && (
+                    <button
+                        className="home__post-job-btn"
+                        onClick={() => setShowPostJobForm(true)}
+                    >
+                        Post Job
+                    </button>
+                )}
+
                 <SearchBar value={searchTerm} onChange={handleSearchChange} />
             </div>
 
@@ -126,14 +143,8 @@ export default function Home() {
                     <FilterPanel
                         filters={filters}
                         jobList={jobList}
-                        onChangeFilter={handleFilterChange}
+                        onApply={handleApplyFilters}
                     />
-                    <button
-                        className="filter-apply-btn"
-                        onClick={handleApplyFilters}
-                    >
-                        Apply
-                    </button>
                 </div>
 
                 <div className="home__jobs">
@@ -156,9 +167,16 @@ export default function Home() {
                     </div>
                 </div>
             </div>
-
+            {/* modal window */}
             {selectedJob && (
                 <JobDetailModal job={selectedJob} onClose={handleCloseModal} />
+            )}
+
+            {showPostJobForm && (
+                <PostJobForm
+                    onClose={() => setShowPostJobForm(false)}
+                    onJobPosted={(newJob) => setJobList([newJob, ...jobList])}
+                />
             )}
         </div>
     );
