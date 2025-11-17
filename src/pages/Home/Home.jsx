@@ -5,7 +5,6 @@ import JobCard from "../../components/JobCard/JobCard";
 import JobDetailModal from "../../components/JobDetailModal/JobDetailModal";
 import FilterPanel from "../../components/FilterPanel/FilterPanel";
 import api from "../../axiosConfig";
-
 import "./Home.css";
 
 export default function Home() {
