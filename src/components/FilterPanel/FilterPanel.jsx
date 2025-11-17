@@ -1,140 +1,107 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { categories, languages, seniorityLevels, skillsMap } from "../../data/filterData";
-
-export default function FilterPanel({ filters, onChangeFilter, jobList }) {
+import "./FilterPanel.css";
+export default function FilterPanel({ filters, onApply , jobList }) {
   const [selectedCategory, setSelectedCategory] = useState(filters.category || "");
-  const [selectedLanguage, setSelectedLanguage] = useState(filters.language[0] || "");
+  const [selectedLanguage, setSelectedLanguage] = useState(filters.language || "");
   const [selectedSeniority, setSelectedSeniority] = useState(filters.seniority || []);
   const [selectedSkills, setSelectedSkills] = useState(filters.skills || []);
   const [availableSkills, setAvailableSkills] = useState([]);
+  const [salaryMin, setSalaryMin] = useState(filters.salary?.[0] ?? "");
+  const [salaryMax, setSalaryMax] = useState(filters.salary?.[1] ?? "");
 
   useEffect(() => {
-    if (selectedLanguage && selectedCategory) {
-      const skillsForSelection = skillsMap[selectedLanguage]?.[selectedCategory];
-      setAvailableSkills(Array.isArray(skillsForSelection) ? skillsForSelection : []);
-      setSelectedSkills(prev =>
-        prev.filter(skill => Array.isArray(skillsForSelection) ? skillsForSelection.includes(skill) : false)
-      );
+    if (selectedCategory && selectedLanguage) {
+      const skills = skillsMap[selectedLanguage]?.[selectedCategory] || [];
+      setAvailableSkills(skills);
+      setSelectedSkills(prev => prev.filter(s => skills.includes(s)));
     } else {
       setAvailableSkills([]);
       setSelectedSkills([]);
     }
-  }, [selectedLanguage, selectedCategory]);
-
-  const getCounts = (items, field) => {
-    const counts = {};
-    if (!jobList || jobList.length === 0) return counts;
-    items.forEach(item => {
-      counts[item] = jobList.filter(job => {
-        if (field === "language") return job.requiredLanguages?.includes(item);
-        if (field === "category") return job.category?.includes(item);
-        if (field === "seniority") return job.grade === item;
-        if (field === "skills") return job.skills?.includes(item);
-        return false;
-      }).length;
-    });
-    return counts;
-  };
-
-  const categoryCounts = useMemo(() => getCounts(categories, "category"), [jobList]);
-  const languageCounts = useMemo(() => getCounts(languages, "language"), [jobList]);
-  const seniorityCounts = useMemo(() => getCounts(seniorityLevels, "seniority"), [jobList]);
-  const skillsCounts = useMemo(() => getCounts(availableSkills, "skills"), [jobList, availableSkills]);
+  }, [selectedCategory, selectedLanguage]);
 
   const toggleSelection = (value, stateArray, setState) => {
-    if (stateArray.includes(value)) {
-      setState(stateArray.filter(v => v !== value));
-    } else {
-      setState([...stateArray, value]);
-    }
+    if (stateArray.includes(value)) setState(stateArray.filter(v => v !== value));
+    else setState([...stateArray, value]);
   };
 
   const handleApply = () => {
-    onChangeFilter({
-      category: selectedCategory,
-      language: selectedLanguage ? [selectedLanguage] : [],
-      seniority: selectedSeniority,
-      skills: selectedSkills
-    });
+  const updatedFilters = {
+    category: selectedCategory || "",
+    language: selectedLanguage || "",
+    seniority: selectedSeniority,
+    skills: selectedSkills,
+    salary: [
+      salaryMin !== "" ? Number(salaryMin) : null,
+      salaryMax !== "" ? Number(salaryMax) : null
+    ]
   };
+  onApply(updatedFilters);
+};
 
-  const renderCheckboxGroup = (items, selected, setSelected, counts) => (
-    <div className="filter-options">
-      {items &&
-        items.length > 0 &&
-        items.map((item, idx) => (
-          <label key={`${item}-${idx}`} className="filter-checkbox">
-            <input
-              type="checkbox"
-              checked={selected.includes(item)}
-              onChange={() => toggleSelection(item, selected, setSelected)}
-            />
-            <span className="checkbox-square"></span>
-            <span className="checkbox-label">
-              {item} ({counts[item] || 0})
-            </span>
-          </label>
-        ))}
-    </div>
-  );
 
   return (
-    <div className="filter-panel">
-      {/* Category */}
+    <div className="filter-panel-vertical">
       <div className="filter-field">
         <p className="filter-title">Category</p>
-        <div className="filter-options">
-          {categories.map((cat, idx) => (
-            <label key={`cat-${cat}-${idx}`} className="filter-checkbox">
-              <input
-                type="radio"
-                name="category"
-                checked={selectedCategory === cat}
-                onChange={() => setSelectedCategory(cat)}
-              />
-              <span className="checkbox-square"></span>
-              <span className="checkbox-label">{cat} ({categoryCounts[cat] || 0})</span>
-            </label>
-          ))}
-        </div>
+        {categories.map(cat => (
+          <label key={cat} className="filter-checkbox">
+            <input type="radio" name="category" checked={selectedCategory === cat} onChange={() => setSelectedCategory(cat)} />
+            <span className="checkbox-square"></span>
+            <span className="checkbox-label">{cat}</span>
+            {selectedCategory === cat && <span className="selected-bird"></span>}
+          </label>
+        ))}
       </div>
 
-      {/* Language */}
       <div className="filter-field">
         <p className="filter-title">Language</p>
-        <div className="filter-options">
-          {languages.map((lang, idx) => (
-            <label key={`lang-${lang}-${idx}`} className="filter-checkbox">
-              <input
-                type="radio"
-                name="language"
-                checked={selectedLanguage === lang}
-                onChange={() => setSelectedLanguage(lang)}
-              />
-              <span className="checkbox-square"></span>
-              <span className="checkbox-label">{lang} ({languageCounts[lang] || 0})</span>
-            </label>
-          ))}
-        </div>
+        {languages.map(lang => (
+          <label key={lang} className="filter-checkbox">
+            <input type="radio" name="language" checked={selectedLanguage === lang} onChange={() => setSelectedLanguage(lang)} />
+            <span className="checkbox-square"></span>
+            <span className="checkbox-label">{lang}</span>
+            {selectedLanguage === lang && <span className="selected-bird"></span>}
+          </label>
+        ))}
       </div>
 
-      {/* Seniority */}
       <div className="filter-field">
         <p className="filter-title">Seniority</p>
-        {renderCheckboxGroup(seniorityLevels, selectedSeniority, setSelectedSeniority, seniorityCounts)}
+        {seniorityLevels.map(level => (
+          <label key={level} className="filter-checkbox">
+            <input type="checkbox" checked={selectedSeniority.includes(level)} onChange={() => toggleSelection(level, selectedSeniority, setSelectedSeniority)} />
+            <span className="checkbox-square"></span>
+            <span className="checkbox-label">{level}</span>
+            {selectedSeniority.includes(level) && <span className="selected-bird"></span>}
+          </label>
+        ))}
       </div>
 
-      {/* Skills */}
       {availableSkills.length > 0 && (
         <div className="filter-field">
           <p className="filter-title">Skills</p>
-          {renderCheckboxGroup(availableSkills, selectedSkills, setSelectedSkills, skillsCounts)}
+          {availableSkills.map(skill => (
+            <label key={skill} className="filter-checkbox">
+              <input type="checkbox" checked={selectedSkills.includes(skill)} onChange={() => toggleSelection(skill, selectedSkills, setSelectedSkills)} />
+              <span className="checkbox-square"></span>
+              <span className="checkbox-label">{skill}</span>
+              {selectedSkills.includes(skill) && <span className="selected-bird"></span>}
+            </label>
+          ))}
         </div>
       )}
 
-      <button className="filter-apply-btn" onClick={handleApply}>
-        Apply
-      </button>
+      <div className="filter-field">
+        <p className="filter-title">Salary Range</p>
+        <div className="salary-inputs">
+          <input type="number" placeholder="Min" value={salaryMin} onChange={e => setSalaryMin(e.target.value)} />
+          <input type="number" placeholder="Max" value={salaryMax} onChange={e => setSalaryMax(e.target.value)} />
+        </div>
+      </div>
+
+      <button className="apply-btn" onClick={handleApply}>Apply</button>
     </div>
   );
 }

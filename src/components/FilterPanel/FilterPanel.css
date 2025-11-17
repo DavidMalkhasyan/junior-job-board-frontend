@@ -79,3 +79,10 @@
 .apply-btn:hover {
   background-color: #0052cc;
 }
+
+.salary-inputs {
+    display: flex;
+    flex-direction: column;
+    max-width: 100px;
+    margin-bottom: 1rem;
+}
