@@ -58,9 +58,11 @@ function Login() {
                 localStorage.setItem("token", data.token);
             }
             if (data.role) {
-                localStorage.setItem("authRole", data.role);
+                localStorage.setItem("Role", data.role);
             }
-
+            if (data[data.role]) {
+                localStorage.setItem("Data", JSON.stringify(data[data.role]));
+            }
             setStatus({
                 type: "success",
                 message: "Logged in! Redirecting...",
