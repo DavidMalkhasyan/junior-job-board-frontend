@@ -18,9 +18,8 @@
     align-items: center;
     justify-content: space-between;
 }
-.jobcard__header__left{
+.jobcard__header__left {
     display: flex;
-
 }
 .jobcard__logo img {
     width: 60px;
@@ -41,11 +40,10 @@
     font-size: 15px;
 }
 
-.jobcard__more{
+.jobcard__more {
     width: 22px;
     height: 5px;
     cursor: pointer;
-
 }
 
 .jobcard__location {
@@ -78,7 +76,6 @@
     font-style: normal;
 }
 
-
 .jobcard__grade,
 .jobcard__worktype,
 .jobcard__salary {
@@ -100,7 +97,7 @@
 /* Skills */
 .jobcard__skills {
     display: flex;
-     font-family: "Open Sans", sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-weight: 400;
     font-style: normal;
     flex-wrap: wrap;
@@ -110,10 +107,10 @@
 
 .jobcard__skill-item {
     padding: 7px 17px;
-    background: #F5F5F9;
+    background: #f5f5f9;
     border-radius: 10px;
     font-size: 13px;
-    color: #BABABA;
+    color: #bababa;
     font-weight: 500;
 }
 
@@ -126,11 +123,11 @@
 }
 
 .jobcard__date {
-   font-family: "Open Sans", sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-weight: 400;
     font-style: normal;
     font-size: 13px;
-    color: #BABABA;
+    color: #bababa;
 }
 
 .jobcard__save {
@@ -167,4 +164,13 @@
     opacity: 0.7;
     transform: scale(1.1);
     transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.jobcard__category {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #5c6bc0;
+    background: #e8eaf6;
+    padding: 4px 10px;
+    border-radius: 6px;
 }
