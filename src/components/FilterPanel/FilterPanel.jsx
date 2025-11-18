@@ -6,25 +6,36 @@ import {
     skillsMap,
 } from "../../data/filterData";
 import "./FilterPanel.css";
-export default function FilterPanel({ filters, onApply, jobList }) {
-    const [selectedCategory, setSelectedCategory] = useState(
-        filters.category || ""
-    );
+
+export default function FilterPanel({ filters, onApply }) {
+    const [selectedCategory, setSelectedCategory] = useState(filters.category ? [filters.category] : []);
     const [selectedLanguage, setSelectedLanguage] = useState(
-        filters.language || ""
+        filters.language ? [decodeURIComponent(filters.language)] : []
     );
-    const [selectedSeniority, setSelectedSeniority] = useState(
-        filters.seniority || []
-    );
+    const [selectedSeniority, setSelectedSeniority] = useState(filters.seniority || []);
     const [selectedSkills, setSelectedSkills] = useState(filters.skills || []);
     const [availableSkills, setAvailableSkills] = useState([]);
     const [salaryMin, setSalaryMin] = useState(filters.salary?.[0] ?? "");
     const [salaryMax, setSalaryMax] = useState(filters.salary?.[1] ?? "");
 
+    const toggleSelection = (value, list, setter) => {
+        setter(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+    };
+
+    const clearFilters = () => {
+        setSelectedCategory([]);
+        setSelectedLanguage([]);
+        setSelectedSeniority([]);
+        setSelectedSkills([]);
+        setSalaryMin("");
+        setSalaryMax("");
+        setAvailableSkills([]);
+    };
+
     useEffect(() => {
-        if (selectedCategory && selectedLanguage) {
-            const skills =
-                skillsMap[selectedLanguage]?.[selectedCategory] || [];
+        if (selectedCategory.length > 0 && selectedLanguage.length > 0) {
+            const langKey = languages[selectedLanguage[0]]?.skillsKey;
+            const skills = skillsMap[langKey]?.[selectedCategory[0]] || [];
             setAvailableSkills(skills);
             setSelectedSkills((prev) => prev.filter((s) => skills.includes(s)));
         } else {
@@ -33,66 +44,66 @@ export default function FilterPanel({ filters, onApply, jobList }) {
         }
     }, [selectedCategory, selectedLanguage]);
 
-    const toggleSelection = (value, stateArray, setState) => {
-        if (stateArray.includes(value))
-            setState(stateArray.filter((v) => v !== value));
-        else setState([...stateArray, value]);
-    };
-
     const handleApply = () => {
-        const updatedFilters = {
-            category: selectedCategory || "",
-            language: selectedLanguage || "",
+        onApply({
+            category: selectedCategory[0] || "",
+            language: selectedLanguage[0] ? languages[selectedLanguage[0]].url : "",
             seniority: selectedSeniority,
             skills: selectedSkills,
             salary: [
                 salaryMin !== "" ? Number(salaryMin) : null,
                 salaryMax !== "" ? Number(salaryMax) : null,
             ],
-        };
-        onApply(updatedFilters);
+        });
     };
 
     return (
         <div className="filter-panel-vertical">
+            {/* CATEGORY */}
             <div className="filter-field">
                 <p className="filter-title">Category</p>
                 {categories.map((cat) => (
                     <label key={cat} className="filter-checkbox">
                         <input
-                            type="radio"
-                            name="category"
-                            checked={selectedCategory === cat}
-                            onChange={() => setSelectedCategory(cat)}
+                            type="checkbox"
+                            checked={selectedCategory.includes(cat)}
+                            onChange={() => toggleSelection(cat, selectedCategory, setSelectedCategory)}
                         />
-                        <span className="checkbox-square"></span>
+                        <span
+                            className="checkbox-square"
+                            style={{
+                                borderColor: selectedCategory.includes(cat) ? "#0062ff" : "#ccc",
+                                background: selectedCategory.includes(cat) ? "#dbe5ff" : "#f5f5f9",
+                            }}
+                        ></span>
                         <span className="checkbox-label">{cat}</span>
-                        {selectedCategory === cat && (
-                            <span className="selected-bird"></span>
-                        )}
                     </label>
                 ))}
             </div>
 
+            {/* LANGUAGE */}
             <div className="filter-field">
                 <p className="filter-title">Language</p>
-                {languages.map((lang) => (
-                    <label key={lang} className="filter-checkbox">
+                {Object.keys(languages).map((key) => (
+                    <label key={key} className="filter-checkbox">
                         <input
-                            type="radio"
-                            name="language"
-                            checked={selectedLanguage === lang}
-                            onChange={() => setSelectedLanguage(lang)}
+                            type="checkbox"
+                            checked={selectedLanguage.includes(key)}
+                            onChange={() => toggleSelection(key, selectedLanguage, setSelectedLanguage)}
                         />
-                        <span className="checkbox-square"></span>
-                        <span className="checkbox-label">{lang}</span>
-                        {selectedLanguage === lang && (
-                            <span className="selected-bird"></span>
-                        )}
+                        <span
+                            className="checkbox-square"
+                            style={{
+                                borderColor: selectedLanguage.includes(key) ? "#0062ff" : "#ccc",
+                                background: selectedLanguage.includes(key) ? "#dbe5ff" : "#f5f5f9",
+                            }}
+                        ></span>
+                        <span className="checkbox-label">{languages[key].display}</span>
                     </label>
                 ))}
             </div>
 
+            {/* SENIORITY */}
             <div className="filter-field">
                 <p className="filter-title">Seniority</p>
                 {seniorityLevels.map((level) => (
@@ -100,23 +111,21 @@ export default function FilterPanel({ filters, onApply, jobList }) {
                         <input
                             type="checkbox"
                             checked={selectedSeniority.includes(level)}
-                            onChange={() =>
-                                toggleSelection(
-                                    level,
-                                    selectedSeniority,
-                                    setSelectedSeniority
-                                )
-                            }
+                            onChange={() => toggleSelection(level, selectedSeniority, setSelectedSeniority)}
                         />
-                        <span className="checkbox-square"></span>
+                        <span
+                            className="checkbox-square"
+                            style={{
+                                borderColor: selectedSeniority.includes(level) ? "#0062ff" : "#ccc",
+                                background: selectedSeniority.includes(level) ? "#dbe5ff" : "#f5f5f9",
+                            }}
+                        ></span>
                         <span className="checkbox-label">{level}</span>
-                        {selectedSeniority.includes(level) && (
-                            <span className="selected-bird"></span>
-                        )}
                     </label>
                 ))}
             </div>
 
+            {/* SKILLS */}
             {availableSkills.length > 0 && (
                 <div className="filter-field">
                     <p className="filter-title">Skills</p>
@@ -125,24 +134,22 @@ export default function FilterPanel({ filters, onApply, jobList }) {
                             <input
                                 type="checkbox"
                                 checked={selectedSkills.includes(skill)}
-                                onChange={() =>
-                                    toggleSelection(
-                                        skill,
-                                        selectedSkills,
-                                        setSelectedSkills
-                                    )
-                                }
+                                onChange={() => toggleSelection(skill, selectedSkills, setSelectedSkills)}
                             />
-                            <span className="checkbox-square"></span>
+                            <span
+                                className="checkbox-square"
+                                style={{
+                                    borderColor: selectedSkills.includes(skill) ? "#0062ff" : "#ccc",
+                                    background: selectedSkills.includes(skill) ? "#dbe5ff" : "#f5f5f9",
+                                }}
+                            ></span>
                             <span className="checkbox-label">{skill}</span>
-                            {selectedSkills.includes(skill) && (
-                                <span className="selected-bird"></span>
-                            )}
                         </label>
                     ))}
                 </div>
             )}
 
+            {/* SALARY */}
             <div className="filter-field">
                 <p className="filter-title">Salary Range</p>
                 <div className="salary-inputs">
@@ -161,9 +168,19 @@ export default function FilterPanel({ filters, onApply, jobList }) {
                 </div>
             </div>
 
-            <button className="apply-btn" onClick={handleApply}>
-                Apply
-            </button>
+            {/* BUTTONS */}
+            <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
+                <button className="apply-btn" onClick={handleApply}>
+                    Apply
+                </button>
+                <button
+                    className="apply-btn"
+                    style={{ backgroundColor: "#ccc", color: "#000" }}
+                    onClick={clearFilters}
+                >
+                    Clear
+                </button>
+            </div>
         </div>
     );
 }
