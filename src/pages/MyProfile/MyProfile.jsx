@@ -37,7 +37,7 @@ export default function MyProfile() {
         if (storedUser) {
             const data = JSON.parse(storedUser);
 
-            if (JSON.parse(role) === "company") {
+            if (role === "company") {
                 setCompanyData({
                     name: data.name || "",
                     email: data.email || "",
