@@ -64,8 +64,14 @@ export default function Home() {
             console.log("Fetching jobs with URL:", url);
             const response = await api.get(url);
             if (response.status === 200) {
-                let data = Object.values(response.data);
-                data.map((job) => {
+                let data = Object.values(response.data).map((job) => {
+                    job.workType = Array.isArray(job.workType)
+                        ? job.workType
+                        : [];
+                    job.skills = Array.isArray(job.skills) ? job.skills : [];
+                    job.requiredLanguages = Array.isArray(job.requiredLanguages)
+                        ? job.requiredLanguages
+                        : [];
                     job.createdAt = new Date(
                         job.createdAt
                     ).toLocaleDateString();
@@ -83,6 +89,8 @@ export default function Home() {
     // ==========================
     useEffect(() => {
         fetchJobs();
+        console.log("Job fetch initiated");
+        console.log("JOBS COUNT", jobList.length);
     }, []);
 
     useEffect(() => {
@@ -99,6 +107,7 @@ export default function Home() {
         if (searchTerm.trim() !== "") {
             fetchJobs(appliedFilters, searchTerm);
         }
+        console.log("Search initiated with term:", searchTerm);
     }, [searchTerm]);
 
     // ==========================
@@ -175,7 +184,28 @@ export default function Home() {
             {showPostJobForm && (
                 <PostJobForm
                     onClose={() => setShowPostJobForm(false)}
-                    onJobPosted={(newJob) => setJobList([newJob, ...jobList])}
+                    onJobPosted={(newJob) =>
+                        setJobList([
+                            {
+                                ...newJob,
+                                workType: Array.isArray(newJob.workType)
+                                    ? newJob.workType
+                                    : [],
+                                skills: Array.isArray(newJob.skills)
+                                    ? newJob.skills
+                                    : [],
+                                requiredLanguages: Array.isArray(
+                                    newJob.requiredLanguages
+                                )
+                                    ? newJob.requiredLanguages
+                                    : [],
+                                createdAt: new Date(
+                                    newJob.createdAt
+                                ).toLocaleDateString(),
+                            },
+                            ...jobList,
+                        ])
+                    }
                 />
             )}
         </div>
