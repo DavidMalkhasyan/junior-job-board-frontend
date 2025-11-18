@@ -36,6 +36,7 @@ export default function MyProfile() {
 
         if (storedRole) setRole(JSON.parse(storedRole));
 
+        
         if (storedUser) {
             const data = JSON.parse(storedUser);
 
