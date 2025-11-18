@@ -4,7 +4,9 @@ import api from "../../axiosConfig";
 import "./MyProfile.css";
 
 export default function MyProfile() {
+    const [role, setRole] = useState(localStorage.getItem("Role") || null);
     const navigate = useNavigate();
+
     const [userData, setUserData] = useState({
         name: "",
         lastname: "",
@@ -25,22 +27,17 @@ export default function MyProfile() {
         location: "",
     });
 
-    const [role, setRole] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
     useEffect(() => {
         const storedUser = localStorage.getItem("Data");
-        const storedRole = localStorage.getItem("Role");
 
-        if (storedRole) setRole(JSON.parse(storedRole));
-
-        
         if (storedUser) {
             const data = JSON.parse(storedUser);
 
-            if (JSON.parse(storedRole) === "company") {
+            if (JSON.parse(role) === "company") {
                 setCompanyData({
                     name: data.name || "",
                     email: data.email || "",
