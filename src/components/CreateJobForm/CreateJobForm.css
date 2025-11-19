@@ -36,9 +36,24 @@
 .checkbox-group,
 .radio-group {
     display: flex;
-    flex-direction: column; /* сделали вертикально */
+    flex-direction: column;
     gap: 0.5rem;
     margin-bottom: 1rem;
+}
+
+.input-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-family: "Open Sans", sans-serif;
+    font-size: 14px;
+}
+
+.input-label input {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
 }
 
 .salary-inputs {

@@ -80,14 +80,12 @@ export default function PostJobForm({ onClose, onJobPosted }) {
                 workType: workType ? [...workType] : [],
             };
 
-            console.log("Submitting job with payload:", payload);
             const res = await api.post("/jobs", payload);
             if (res.status === 201 || res.status === 200) {
                 onJobPosted && onJobPosted(res.data);
                 onClose && onClose();
             }
         } catch (err) {
-            console.log("Backend error:", err.response?.data);
             console.error(err);
             setError("Failed to post job. Try again.");
         } finally {
@@ -117,7 +115,7 @@ export default function PostJobForm({ onClose, onJobPosted }) {
                     <label>Category</label>
                     <div className="radio-group">
                         {categoriesOptions.map((c) => (
-                            <label key={c}>
+                            <label key={c} className="input-label">
                                 <input
                                     type="radio"
                                     name="category"
@@ -133,7 +131,7 @@ export default function PostJobForm({ onClose, onJobPosted }) {
                     <label>Required Language</label>
                     <div className="radio-group">
                         {languagesOptions.map((l) => (
-                            <label key={l}>
+                            <label key={l} className="input-label">
                                 <input
                                     type="radio"
                                     name="language"
@@ -165,7 +163,7 @@ export default function PostJobForm({ onClose, onJobPosted }) {
                             <label>Skills</label>
                             <div className="checkbox-group">
                                 {availableSkills.map((s) => (
-                                    <label key={s}>
+                                    <label key={s} className="input-label">
                                         <input
                                             type="checkbox"
                                             checked={skills.includes(s)}
@@ -210,7 +208,7 @@ export default function PostJobForm({ onClose, onJobPosted }) {
                     <label>Work Type</label>
                     <div className="checkbox-group">
                         {workTypeOptions.map((w) => (
-                            <label key={w}>
+                            <label key={w} className="input-label">
                                 <input
                                     type="checkbox"
                                     checked={workType.includes(w)}
