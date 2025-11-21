@@ -1,0 +1,55 @@
+.myjobs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    width: 100%;
+}
+
+.myjobs__card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.myjobs__button {
+    border: none;
+    border-radius: 999px;
+    padding: 10px 22px;
+    background: #eef4ff;
+    color: #0062ff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.myjobs__button--danger {
+    background: #ffecec;
+    color: #e63946;
+}
+
+.myjobs__button:hover {
+    background: #d9e6ff;
+}
+
+.myjobs__button--danger:hover {
+    background: #ffcdd2;
+}
+
+.myjobs__status {
+    width: 100%;
+    text-align: center;
+    padding: 32px 16px;
+    font-size: 1rem;
+    color: #555;
+}
+
+.myjobs__status--error {
+    color: #e63946;
+}
+
+@media (max-width: 600px) {
+    .myjobs {
+        grid-template-columns: 1fr;
+    }
+}
