@@ -1,6 +1,6 @@
 import "./JobCard.css";
 
-export default function JobCard({ job }) {
+export default function JobCard({ job, actions }) {
   const workType = Array.isArray(job.workType) ? job.workType : [];
 
   return (
@@ -39,7 +39,11 @@ export default function JobCard({ job }) {
 
       <div className="jobcard__footer">
         <p className="jobcard__date">{job.createdAt}</p>
-        <img className="jobcard__save" src="src/assets/images/saveButton.svg" alt="save" />
+        {actions ? (
+          <div className="jobcard__actions">{actions}</div>
+        ) : (
+          <img className="jobcard__save" src="src/assets/images/saveButton.svg" alt="save" />
+        )}
       </div>
     </div>
   );

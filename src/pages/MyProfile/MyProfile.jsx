@@ -85,7 +85,7 @@ export default function MyProfile() {
         }
 
         const data = JSON.parse(storedUser);
-        const userId = data._id;
+        const userId = data._id.$oid;
 
         try {
             let res;

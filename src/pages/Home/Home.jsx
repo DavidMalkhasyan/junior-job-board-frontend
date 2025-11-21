@@ -5,6 +5,7 @@ import JobCard from "../../components/JobCard/JobCard";
 import JobDetailModal from "../../components/JobDetailModal/JobDetailModal";
 import FilterPanel from "../../components/FilterPanel/FilterPanel";
 import PostJobForm from "../../components/CreateJobForm/CreateJobForm";
+import MyJobs from "../../components/myJobs/myJobs";
 import api from "../../axiosConfig";
 import "./Home.css";
 
@@ -14,8 +15,12 @@ export default function Home() {
     const [selectedJob, setSelectedJob] = useState(null);
     const [jobList, setJobList] = useState([]);
     const [userData, setData] = useState(null);
-    const [role, setRole] = useState(localStorage.getItem("Role") || null);
+    const [role, setRole] = useState(() => {
+        const storedRole = localStorage.getItem("Role");
+        return storedRole ? JSON.parse(storedRole) : null;
+    });
     const [showPostJobForm, setShowPostJobForm] = useState(false);
+    const [showMyJobs, setShowMyJobs] = useState(false);
 
     const [filters, setFilters] = useState({
         category: "",
@@ -136,12 +141,22 @@ export default function Home() {
 
             <div className="home__topbar">
                 {role === "company" && (
-                    <button
-                        className="home__post-job-btn"
-                        onClick={() => setShowPostJobForm(true)}
-                    >
-                        Post Job
-                    </button>
+                    <>
+                        <button
+                            className="home__post-job-btn"
+                            onClick={() => setShowPostJobForm(true)}
+                        >
+                            Post Job
+                        </button>
+                        <button
+                            className={`home__post-job-btn ${
+                                showMyJobs ? "is-active" : ""
+                            }`}
+                            onClick={() => setShowMyJobs((prev) => !prev)}
+                        >
+                            {showMyJobs ? "All Jobs" : "My Jobs"}
+                        </button>
+                    </>
                 )}
 
                 <SearchBar value={searchTerm} onChange={handleSearchChange} />
@@ -157,23 +172,29 @@ export default function Home() {
                 </div>
 
                 <div className="home__jobs">
-                    <div className="">
-                        <h2>{jobList.length} Jobs Found </h2>
-                    </div>
-                    <div className="job-listings">
-                        {jobList?.length ? (
-                            jobList.map((job, i) => (
-                                <div
-                                    key={i}
-                                    onClick={() => handleOpenModal(job)}
-                                >
-                                    <JobCard job={job} />
-                                </div>
-                            ))
-                        ) : (
-                            <div>No jobs found.</div>
-                        )}
-                    </div>
+                    {showMyJobs ? (
+                        <MyJobs />
+                    ) : (
+                        <>
+                            <div className="">
+                                <h2>{jobList.length} Jobs Found </h2>
+                            </div>
+                            <div className="job-listings">
+                                {jobList?.length ? (
+                                    jobList.map((job, i) => (
+                                        <div
+                                            key={i}
+                                            onClick={() => handleOpenModal(job)}
+                                        >
+                                            <JobCard job={job} />
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div>No jobs found.</div>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
             {/* modal window */}
