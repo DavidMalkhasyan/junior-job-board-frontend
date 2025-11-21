@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+`import React, { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import JobCard from "../../components/JobCard/JobCard";
@@ -15,10 +15,7 @@ export default function Home() {
     const [selectedJob, setSelectedJob] = useState(null);
     const [jobList, setJobList] = useState([]);
     const [userData, setData] = useState(null);
-    const [role, setRole] = useState(() => {
-        const storedRole = localStorage.getItem("Role");
-        return storedRole ? JSON.parse(storedRole) : null;
-    });
+    const [role, setRole] = useState(null);
     const [showPostJobForm, setShowPostJobForm] = useState(false);
     const [showMyJobs, setShowMyJobs] = useState(false);
 
@@ -36,6 +33,7 @@ export default function Home() {
     // BUILD URL FOR API REQUEST
     // ==========================
     const buildJobsUrl = (filterObj = {}, search = "") => {
+        console.log("Role", role, typeof role);
         const {
             language = "",
             seniority = [],
@@ -66,7 +64,6 @@ export default function Home() {
     const fetchJobs = async (filterObj = {}, search = "") => {
         try {
             const url = buildJobsUrl(filterObj, search);
-            console.log("Fetching jobs with URL:", url);
             const response = await api.get(url);
             if (response.status === 200) {
                 let data = Object.values(response.data).map((job) => {
@@ -94,8 +91,8 @@ export default function Home() {
     // ==========================
     useEffect(() => {
         fetchJobs();
-        console.log("Job fetch initiated");
-        console.log("JOBS COUNT", jobList.length);
+        const storedRole = localStorage.getItem("Role");
+        setRole(storedRole);
     }, []);
 
     useEffect(() => {
@@ -112,7 +109,6 @@ export default function Home() {
         if (searchTerm.trim() !== "") {
             fetchJobs(appliedFilters, searchTerm);
         }
-        console.log("Search initiated with term:", searchTerm);
     }, [searchTerm]);
 
     // ==========================
@@ -128,6 +124,13 @@ export default function Home() {
         fetchJobs(appliedFilters, searchTerm);
     };
 
+    const handleLogout = () => {
+        localStorage.clear();
+        setData(null);
+        setRole(null);
+        window.location.reload();
+    };
+
     // ==========================
     // RENDER
     // ==========================
@@ -137,6 +140,7 @@ export default function Home() {
                 active={activeSection}
                 onChangeActive={handleSectionChange}
                 userData={userData}
+                handleLogout={handleLogout}
             />
 
             <div className="home__topbar">

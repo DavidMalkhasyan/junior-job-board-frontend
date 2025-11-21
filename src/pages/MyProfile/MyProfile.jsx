@@ -97,7 +97,6 @@ export default function MyProfile() {
 
             if (res.status === 200) {
                 setSuccess("Profile updated!");
-                localStorage.setItem("Data", JSON.stringify(res.data));
             }
         } catch (err) {
             console.error(err);

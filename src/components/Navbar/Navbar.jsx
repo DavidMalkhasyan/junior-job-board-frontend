@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import Logo from "../../assets/images/Logo.svg";
 
-export default function Navbar({ active, onChangeActive, userData }) {
+export default function Navbar({ active, onChangeActive, userData, handleLogout }) {
     const navigate = useNavigate();
 
     const menuItems = [
@@ -59,6 +59,9 @@ export default function Navbar({ active, onChangeActive, userData }) {
                             {userData.name || userData.email}
                         </div>
                     )}
+                    <button className="home__logout-btn" onClick={handleLogout}>
+                        Logout
+                    </button>
                 </div>
             ) : (
                 <div className="navbar__profile">
