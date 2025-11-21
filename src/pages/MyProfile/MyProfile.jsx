@@ -85,7 +85,7 @@ export default function MyProfile() {
         }
 
         const data = JSON.parse(storedUser);
-        const userId = data._id;
+        const userId = data._id.$oid;
 
         try {
             let res;
@@ -97,7 +97,6 @@ export default function MyProfile() {
 
             if (res.status === 200) {
                 setSuccess("Profile updated!");
-                localStorage.setItem("Data", JSON.stringify(res.data));
             }
         } catch (err) {
             console.error(err);
