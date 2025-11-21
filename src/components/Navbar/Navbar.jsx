@@ -59,6 +59,9 @@ export default function Navbar({ active, onChangeActive, userData, handleLogout 
                             {userData.name || userData.email}
                         </div>
                     )}
+                    <button className="home__logout-btn" onClick={handleLogout}>
+                        Logout
+                    </button>
                 </div>
             ) : (
                 <div className="navbar__profile">
@@ -75,10 +78,6 @@ export default function Navbar({ active, onChangeActive, userData, handleLogout 
                     </div>
                 </div>
             )}
-
-            <button className="home__logout-btn" onClick={handleLogout}>
-                Logout
-            </button>
         </div>
     );
 }
