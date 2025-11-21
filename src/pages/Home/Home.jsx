@@ -123,6 +123,13 @@ export default function Home() {
         fetchJobs(appliedFilters, searchTerm);
     };
 
+    const handleLogout = () => {
+        localStorage.clear();
+        setData(null);
+        setRole(null);
+        window.location.reload();
+    };
+
     // ==========================
     // RENDER
     // ==========================
@@ -132,6 +139,7 @@ export default function Home() {
                 active={activeSection}
                 onChangeActive={handleSectionChange}
                 userData={userData}
+                handleLogout={handleLogout}
             />
 
             <div className="home__topbar">

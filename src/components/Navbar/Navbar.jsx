@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import Logo from "../../assets/images/Logo.svg";
 
-export default function Navbar({ active, onChangeActive, userData }) {
+export default function Navbar({ active, onChangeActive, userData, handleLogout }) {
     const navigate = useNavigate();
 
     const menuItems = [
@@ -75,6 +75,10 @@ export default function Navbar({ active, onChangeActive, userData }) {
                     </div>
                 </div>
             )}
+
+            <button className="home__logout-btn" onClick={handleLogout}>
+                Logout
+            </button>
         </div>
     );
 }
