@@ -14,7 +14,7 @@ export default function Home() {
     const [selectedJob, setSelectedJob] = useState(null);
     const [jobList, setJobList] = useState([]);
     const [userData, setData] = useState(null);
-    const [role, setRole] = useState(localStorage.getItem("Role") || null);
+    const [role, setRole] = useState(null);
     const [showPostJobForm, setShowPostJobForm] = useState(false);
 
     const [filters, setFilters] = useState({
@@ -31,6 +31,7 @@ export default function Home() {
     // BUILD URL FOR API REQUEST
     // ==========================
     const buildJobsUrl = (filterObj = {}, search = "") => {
+        console.log("Role", role, typeof role);
         const {
             language = "",
             seniority = [],
@@ -61,7 +62,6 @@ export default function Home() {
     const fetchJobs = async (filterObj = {}, search = "") => {
         try {
             const url = buildJobsUrl(filterObj, search);
-            console.log("Fetching jobs with URL:", url);
             const response = await api.get(url);
             if (response.status === 200) {
                 let data = Object.values(response.data).map((job) => {
@@ -89,8 +89,8 @@ export default function Home() {
     // ==========================
     useEffect(() => {
         fetchJobs();
-        console.log("Job fetch initiated");
-        console.log("JOBS COUNT", jobList.length);
+        const storedRole = localStorage.getItem("Role");
+        setRole(storedRole);
     }, []);
 
     useEffect(() => {
@@ -107,7 +107,6 @@ export default function Home() {
         if (searchTerm.trim() !== "") {
             fetchJobs(appliedFilters, searchTerm);
         }
-        console.log("Search initiated with term:", searchTerm);
     }, [searchTerm]);
 
     // ==========================
