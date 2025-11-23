@@ -2,18 +2,25 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar/Navbar";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import JobCard from "../../components/JobCard/JobCard";
+import UserCard from "../../components/UserCard/UserCard";
+import CompanyCard from "../../components/CompanyCard/CompanyCard";
 import JobDetailModal from "../../components/JobDetailModal/JobDetailModal";
 import FilterPanel from "../../components/FilterPanel/FilterPanel";
 import PostJobForm from "../../components/CreateJobForm/CreateJobForm";
 import MyJobs from "../../components/myJobs/myJobs";
 import api from "../../axiosConfig";
+import { mockCompanies } from "../../data/mockCompanies";
+import { mockUsers } from "../../data/mockUsers";
+
 import "./Home.css";
 
 export default function Home() {
     const [activeSection, setActiveSection] = useState("home");
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedJob, setSelectedJob] = useState(null);
+    const [selectedItem, setSelectedItem] = useState(null);
     const [jobList, setJobList] = useState([]);
+    const [userList, setUserList] = useState([]);
+    const [companyList, setCompanyList] = useState([]);
     const [userData, setData] = useState(null);
     const [role, setRole] = useState(null);
     const [showPostJobForm, setShowPostJobForm] = useState(false);
@@ -37,7 +44,6 @@ export default function Home() {
             skills = [],
             salary = [null, null],
         } = filterObj;
-
         let params = [];
         if (language) params.push(`language=${language}`);
         if (seniority.length) params.push(`grade=${seniority.join(",")}`);
@@ -50,28 +56,36 @@ export default function Home() {
         }
         if (search) params.push(`search=${search}`);
         params.push("page=1");
-
         return `/jobs?${params.join("&")}`;
+    };
+
+    const buildUsersUrl = (filterObj = {}, search = "") => {
+        const { language = "", seniority = [], skills = [] } = filterObj;
+        let params = [];
+        if (language) params.push(`languages=${language}`);
+        if (seniority.length) params.push(`seniority=${seniority.join(",")}`);
+        if (skills.length) params.push(`skills=${skills.join(",")}`);
+        if (search) params.push(`search=${search}`);
+        params.push("page=1");
+        return `/users?${params.join("&")}`;
     };
 
     const fetchJobs = async (filterObj = {}, search = "") => {
         try {
             const url = buildJobsUrl(filterObj, search);
-            const response = await api.get(url);
-            if (response.status === 200) {
-                let data = Object.values(response.data).map((job) => {
-                    job.workType = Array.isArray(job.workType)
-                        ? job.workType
-                        : [];
-                    job.skills = Array.isArray(job.skills) ? job.skills : [];
-                    job.requiredLanguages = Array.isArray(job.requiredLanguages)
+            const res = await api.get(url);
+            if (res.status === 200 && res.data) {
+                const data = Object.values(res.data).map((job) => ({
+                    ...job,
+                    workType: Array.isArray(job.workType) ? job.workType : [],
+                    skills: Array.isArray(job.skills) ? job.skills : [],
+                    requiredLanguages: Array.isArray(job.requiredLanguages)
                         ? job.requiredLanguages
-                        : [];
-                    job.createdAt = job.createdAt
+                        : [],
+                    createdAt: job.createdAt
                         ? new Date(job.createdAt).toLocaleDateString()
-                        : "";
-                    return job;
-                });
+                        : "",
+                }));
                 setJobList(data);
             }
         } catch (err) {
@@ -79,35 +93,86 @@ export default function Home() {
         }
     };
 
-    useEffect(() => {
-        fetchJobs();
-        const storedRole = localStorage.getItem("Role");
-        setRole(storedRole);
-    }, []);
+    const fetchUsers = async (filterObj = {}, search = "") => {
+        try {
+            const url = buildUsersUrl(filterObj, search);
+            const res = await api.get(url);
+            let data = [];
+            if (res.status === 200 && res.data) {
+                data = Object.values(res.data).map((user) => ({
+                    ...user,
+                    programmingLanguages: Array.isArray(
+                        user.programmingLanguages
+                    )
+                        ? user.programmingLanguages
+                        : [],
+                    skills: Array.isArray(user.skills) ? user.skills : [],
+                    category: Array.isArray(user.category) ? user.category : [],
+                    createdAt: user.createdAt
+                        ? new Date(user.createdAt).toLocaleDateString()
+                        : "",
+                }));
+            } else {
+                data = mockUsers;
+            }
+            setUserList(data);
+        } catch (err) {
+            console.error("Failed to fetch users:", err);
+            setUserList(mockUsers);
+        }
+    };
+
+    const fetchCompanies = async () => {
+        try {
+            const res = await api.get("/companies?page=1");
+            let data = [];
+            if (res.status === 200 && res.data) {
+                data = Object.values(res.data).map((company) => ({
+                    ...company,
+                    createdAt: company.createdAt
+                        ? new Date(company.createdAt).toLocaleDateString()
+                        : "",
+                }));
+            } else {
+                data = mockCompanies;
+            }
+            setCompanyList(data);
+        } catch (err) {
+            console.error("Failed to fetch companies:", err);
+            setCompanyList(mockCompanies);
+        }
+    };
 
     useEffect(() => {
+        if (activeSection === "home") fetchJobs();
+        if (activeSection === "resumes") fetchUsers();
+        if (activeSection === "company") fetchCompanies();
+    }, [activeSection]);
+
+    useEffect(() => {
+        const storedRole = localStorage.getItem("Role");
+        setRole(storedRole);
         const storedUser = localStorage.getItem("Data");
-        if (storedUser) {
-            setData(JSON.parse(storedUser));
-        }
+        if (storedUser) setData(JSON.parse(storedUser));
     }, []);
 
     useEffect(() => {
         if (searchTerm.trim() !== "") {
-            fetchJobs(appliedFilters, searchTerm);
+            if (activeSection === "home") fetchJobs(appliedFilters, searchTerm);
+            if (activeSection === "resumes")
+                fetchUsers(appliedFilters, searchTerm);
         }
-    }, [searchTerm]);
+    }, [searchTerm, activeSection]);
 
     const handleSectionChange = (section) => setActiveSection(section);
     const handleSearchChange = (term) => setSearchTerm(term);
-
-    const handleOpenModal = (job) => setSelectedJob(job);
-    const handleCloseModal = () => setSelectedJob(null);
-
+    const handleOpenModal = (item) => setSelectedItem(item);
+    const handleCloseModal = () => setSelectedItem(null);
     const handleApplyFilters = (appliedFilters) => {
-        fetchJobs(appliedFilters, searchTerm);
+        if (activeSection === "home") fetchJobs(appliedFilters, searchTerm);
+        if (activeSection === "resumes") fetchUsers(appliedFilters, searchTerm);
+        setAppliedFilters(appliedFilters);
     };
-
     const handleLogout = () => {
         localStorage.clear();
         setData(null);
@@ -133,7 +198,6 @@ export default function Home() {
                         >
                             Post Job
                         </button>
-
                         <button
                             className={`home__post-job-btn ${
                                 showMyJobs ? "is-active" : ""
@@ -144,7 +208,6 @@ export default function Home() {
                         </button>
                     </>
                 )}
-
                 {role === "admin" && (
                     <>
                         <button
@@ -153,7 +216,6 @@ export default function Home() {
                         >
                             Admin Panel
                         </button>
-
                         <button
                             className="home__post-job-btn"
                             onClick={() => setShowPostJobForm(true)}
@@ -162,47 +224,79 @@ export default function Home() {
                         </button>
                     </>
                 )}
-
                 <SearchBar value={searchTerm} onChange={handleSearchChange} />
             </div>
 
             <div className="home__content">
                 <div className="home__filters">
-                    <FilterPanel
-                        filters={filters}
-                        jobList={jobList}
-                        onApply={handleApplyFilters}
-                    />
+                    {activeSection === "home" || activeSection === "resumes" ? (
+                        <FilterPanel
+                            filters={filters}
+                            jobList={jobList}
+                            onApply={handleApplyFilters}
+                        />
+                    ) : null}
                 </div>
 
                 <div className="home__jobs">
-                    {showMyJobs ? (
+                    {showMyJobs && activeSection === "home" ? (
                         <MyJobs />
                     ) : (
                         <>
                             <div className="">
-                                <h2>{jobList.length} Jobs Found </h2>
+                                <h2>
+                                    {activeSection === "home"
+                                        ? `${jobList.length} Jobs Found`
+                                        : activeSection === "resumes"
+                                        ? `${userList.length} Users Found`
+                                        : `${companyList.length} Companies Found`}
+                                </h2>
                             </div>
                             <div className="job-listings">
-                                {jobList?.length ? (
-                                    jobList.map((job, i) => (
-                                        <JobCard
-                                            key={job._id || i}
-                                            job={job}
-                                            onClick={handleOpenModal}
-                                        />
-                                    ))
-                                ) : (
-                                    <div>No jobs found.</div>
-                                )}
+                                {activeSection === "home" &&
+                                    (jobList.length ? (
+                                        jobList.map((job, i) => (
+                                            <JobCard
+                                                key={job._id || i}
+                                                job={job}
+                                                onClick={handleOpenModal}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div>No jobs found.</div>
+                                    ))}
+                                {activeSection === "resumes" &&
+                                    (userList.length ? (
+                                        userList.map((user, i) => (
+                                            <UserCard
+                                                key={user._id || i}
+                                                user={user}
+                                                onClick={handleOpenModal}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div>No users found.</div>
+                                    ))}
+                                {activeSection === "company" &&
+                                    (companyList.length ? (
+                                        companyList.map((comp, i) => (
+                                            <CompanyCard
+                                                key={comp._id || i}
+                                                company={comp}
+                                                onClick={handleOpenModal}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div>No companies found.</div>
+                                    ))}
                             </div>
                         </>
                     )}
                 </div>
             </div>
 
-            {selectedJob && (
-                <JobDetailModal job={selectedJob} onClose={handleCloseModal} />
+            {selectedItem && (
+                <JobDetailModal job={selectedItem} onClose={handleCloseModal} />
             )}
 
             {showPostJobForm && (

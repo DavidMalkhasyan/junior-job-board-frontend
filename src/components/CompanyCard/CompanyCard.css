@@ -1,4 +1,4 @@
-.usercard {
+.companycard {
   background: #fff;
   padding: 18px;
   border-radius: 16px;
@@ -10,49 +10,48 @@
   transition: transform .12s ease, box-shadow .12s ease;
 }
 
-.usercard:hover {
+.companycard:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 24px rgba(17,24,39,0.08);
 }
 
-.usercard__header {
+.companycard__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.usercard__header__left {
+.companycard__header__left {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.usercard__avatar img {
+.companycard__logo img {
   width: 48px;
   height: 48px;
-  object-fit: cover;
-  border-radius: 50%;
+  object-fit: contain;
 }
 
-.usercard__name {
+.companycard__title {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #111827;
 }
 
-.usercard__location {
+.companycard__location {
   margin: 0;
   font-size: 13px;
   color: #6b7280;
 }
 
-.usercard__more {
+.companycard__more {
   width: 20px;
   height: 20px;
 }
 
-.usercard__details {
+.companycard__details {
   display: flex;
   gap: 12px;
   align-items: center;
@@ -60,33 +59,25 @@
   color: #374151;
 }
 
-.usercard__languages {
+.companycard__website {
   font-size: 13px;
   color: #374151;
 }
 
-.usercard__skills {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+.companycard__description {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 0;
 }
 
-.usercard__skill-item {
-  background: #f3f4f6;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  color: #374151;
-}
-
-.usercard__footer {
+.companycard__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.usercard__date {
+.companycard__date {
   font-size: 12px;
   color: #9ca3af;
 }
