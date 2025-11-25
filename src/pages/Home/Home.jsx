@@ -9,8 +9,6 @@ import FilterPanel from "../../components/FilterPanel/FilterPanel";
 import PostJobForm from "../../components/CreateJobForm/CreateJobForm";
 import MyJobs from "../../components/myJobs/myJobs";
 import api from "../../axiosConfig";
-import { mockCompanies } from "../../data/mockCompanies";
-import { mockUsers } from "../../data/mockUsers";
 
 import "./Home.css";
 
@@ -257,7 +255,7 @@ export default function Home() {
                                     (jobList.length ? (
                                         jobList.map((job, i) => (
                                             <JobCard
-                                                key={job._id || i}
+                                                key={`${job._id}-${job.title}-${i}`}
                                                 job={job}
                                                 onClick={handleOpenModal}
                                             />
@@ -269,7 +267,9 @@ export default function Home() {
                                     (userList.length ? (
                                         userList.map((user, i) => (
                                             <UserCard
-                                                key={user._id || i}
+                                                key={`${user._id || "no-id"}-${
+                                                    user.email || i
+                                                }`}
                                                 user={user}
                                                 onClick={handleOpenModal}
                                             />
@@ -281,7 +281,9 @@ export default function Home() {
                                     (companyList.length ? (
                                         companyList.map((comp, i) => (
                                             <CompanyCard
-                                                key={comp._id || i}
+                                                key={`${comp._id || "no-id"}-${
+                                                    comp.name || i
+                                                }`}
                                                 company={comp}
                                                 onClick={handleOpenModal}
                                             />
