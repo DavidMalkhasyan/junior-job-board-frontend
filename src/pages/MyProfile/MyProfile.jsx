@@ -4,7 +4,7 @@ import api from "../../axiosConfig";
 import "./MyProfile.css";
 
 export default function MyProfile() {
-    const [role, setRole] = useState(localStorage.getItem("Role") || null);
+    const [role, setRole] = useState(null);
     const navigate = useNavigate();
 
     const [userData, setUserData] = useState({
@@ -17,12 +17,14 @@ export default function MyProfile() {
         programmingLanguages: [],
         skills: [],
         category: [],
+        photoBase64: "",
+        resumeBase64: "",
     });
 
     const [companyData, setCompanyData] = useState({
         name: "",
         email: "",
-        website: [], // githu linkedin
+        website: [],
         description: "",
         location: "",
     });
@@ -31,22 +33,30 @@ export default function MyProfile() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
+    const [photoFile, setPhotoFile] = useState(null);
+    const [resumeFile, setResumeFile] = useState(null);
+    const [photoStatus, setPhotoStatus] = useState("");
+    const [resumeStatus, setResumeStatus] = useState("");
+
     useEffect(() => {
         const storedUser = localStorage.getItem("Data");
-
+        const storedRole = localStorage.getItem("Role");
+        setRole(storedRole);
         if (storedUser) {
             const data = JSON.parse(storedUser);
 
-            if (role === "company") {
+            if (storedRole === "company") {
                 setCompanyData({
                     name: data.name || "",
                     email: data.email || "",
                     website: data.website || [],
+                    photoBase64: data.photoBase64 || "",
                     description: data.description || "",
                     location: data.location || "",
                 });
             } else {
-                setUserData({
+                setUserData((prev) => ({
+                    ...prev,
                     name: data.name || "",
                     lastname: data.lastname || "",
                     email: data.email || "",
@@ -56,7 +66,9 @@ export default function MyProfile() {
                     programmingLanguages: data.programmingLanguages || [],
                     skills: data.skills || [],
                     category: data.category || [],
-                });
+                    photoBase64: data.photoBase64 || "",
+                    resumeBase64: data.resumeBase64 || "",
+                }));
             }
         }
     }, []);
@@ -71,44 +83,133 @@ export default function MyProfile() {
         setCompanyData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
-        setSuccess("");
+    const handlePhotoUpload = () => {
+        if (!photoFile) return;
+        const reader = new FileReader();
+        reader.readAsDataURL(photoFile);
+        reader.onloadend = async () => {
+            const photoBase64 = reader.result;
+            setPhotoStatus("Uploading...");
 
-        const storedUser = localStorage.getItem("Data");
-        if (!storedUser) {
-            setError("No user data found");
-            setLoading(false);
-            return;
-        }
+            try {
+                const storedUser = localStorage.getItem("Data");
+                const userId = JSON.parse(storedUser)._id.$oid;
 
-        const data = JSON.parse(storedUser);
-        const userId = data._id.$oid;
+                let res;
+                if (role === "company") {
+                    res = await api.put(`/companies/${userId}`, {
+                        photoBase64,
+                    });
 
-        try {
-            let res;
-            if (role === "company") {
-                res = await api.put(`/companies/${userId}`, companyData);
-            } else {
-                res = await api.put(`/users/${userId}`, userData);
+                    if (res.status === 200) {
+                        setCompanyData((prev) => ({ ...prev, photoBase64 }));
+
+                        const updated = {
+                            ...JSON.parse(storedUser),
+                            photoBase64,
+                        };
+                        localStorage.setItem("Data", JSON.stringify(updated));
+
+                        setPhotoStatus("Photo uploaded successfully!");
+                    } else setPhotoStatus("Upload failed");
+                } else {
+                    res = await api.put(`/users/${userId}`, { photoBase64 });
+
+                    if (res.status === 200) {
+                        setUserData((prev) => ({ ...prev, photoBase64 }));
+
+                        const updated = {
+                            ...JSON.parse(storedUser),
+                            photoBase64,
+                        };
+                        localStorage.setItem("Data", JSON.stringify(updated));
+
+                        setPhotoStatus("Photo uploaded successfully!");
+                    } else setPhotoStatus("Upload failed");
+                }
+
+                setPhotoFile(null);
+            } catch (err) {
+                console.error(err);
+                setPhotoStatus("Upload failed");
             }
+        };
+    };
 
-            if (res.status === 200) {
-                setSuccess("Profile updated!");
+    const handlePhotoUpload = () => {
+        if (!photoFile) return;
+        const reader = new FileReader();
+        reader.readAsDataURL(photoFile);
+        reader.onloadend = async () => {
+            const photoBase64 = reader.result;
+            setPhotoStatus("Uploading...");
+            try {
+                const storedUser = localStorage.getItem("Data");
+                const userId = JSON.parse(storedUser)._id.$oid;
+
+                let res;
+                if (role === "company") {
+                    res = await api.put(`/companies/${userId}`, {
+                        photoBase64,
+                    });
+                    if (res.status === 200) {
+                        setCompanyData((prev) => ({ ...prev, photoBase64 }));
+                        setPhotoStatus("Photo uploaded successfully!");
+                        setPhotoFile(null);
+                    } else {
+                        setPhotoStatus("Upload failed");
+                    }
+                } else {
+                    res = await api.put(`/users/${userId}`, { photoBase64 });
+                    if (res.status === 200) {
+                        setUserData((prev) => ({ ...prev, photoBase64 }));
+                        setPhotoStatus("Photo uploaded successfully!");
+                        setPhotoFile(null);
+                    } else {
+                        setPhotoStatus("Upload failed");
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                setPhotoStatus("Upload failed");
             }
-        } catch (err) {
-            console.error(err);
-            setError("Update failed");
-        } finally {
-            setLoading(false);
-        }
+        };
+    };
+
+    const handleResumeUpload = () => {
+        if (!resumeFile) return;
+        const reader = new FileReader();
+        reader.readAsDataURL(resumeFile);
+        reader.onloadend = async () => {
+            const resumeBase64 = reader.result;
+            setResumeStatus("Uploading...");
+            try {
+                const storedUser = localStorage.getItem("Data");
+                const userId = JSON.parse(storedUser)._id.$oid;
+
+                const res = await api.put(`/users/${userId}`, { resumeBase64 });
+
+                if (res.status === 200) {
+                    setUserData((prev) => ({ ...prev, resumeBase64 }));
+
+                    const updated = { ...JSON.parse(storedUser), resumeBase64 };
+                    localStorage.setItem("Data", JSON.stringify(updated));
+
+                    setResumeStatus("Resume uploaded successfully!");
+                    setResumeFile(null);
+                } else {
+                    setResumeStatus("Upload failed");
+                }
+            } catch (err) {
+                console.error(err);
+                setResumeStatus("Upload failed");
+            }
+        };
     };
 
     return (
         <>
-            <button onClick={() => navigate("/")}>back to home</button>
+            <button onClick={() => navigate("/")}>Back to Home</button>
             <div className="profile-container">
                 <form onSubmit={handleSubmit} className="profile-form">
                     <h2>
@@ -119,6 +220,24 @@ export default function MyProfile() {
 
                     {role === "company" ? (
                         <>
+                            <label>Profile Photo</label>
+                            <div className="upload-section">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setPhotoFile(e.target.files[0])
+                                    }
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handlePhotoUpload}
+                                >
+                                    Upload Photo
+                                </button>
+                                {photoStatus && <p>{photoStatus}</p>}
+                            </div>
+
                             <input
                                 type="text"
                                 name="name"
@@ -140,7 +259,7 @@ export default function MyProfile() {
                                     <input
                                         type="text"
                                         value={url}
-                                        placeholder="add website"
+                                        placeholder="Add website"
                                         onChange={(e) => {
                                             const newWebsites = [
                                                 ...companyData.website,
@@ -165,7 +284,7 @@ export default function MyProfile() {
                                             }));
                                         }}
                                     >
-                                        remove
+                                        Remove
                                     </button>
                                 </div>
                             ))}
@@ -197,6 +316,24 @@ export default function MyProfile() {
                         </>
                     ) : (
                         <>
+                            <label>Profile Photo</label>
+                            <div className="upload-section">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                        setPhotoFile(e.target.files[0])
+                                    }
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handlePhotoUpload}
+                                >
+                                    Upload Photo
+                                </button>
+                                {photoStatus && <p>{photoStatus}</p>}
+                            </div>
+
                             <input
                                 type="text"
                                 name="name"
@@ -263,7 +400,7 @@ export default function MyProfile() {
                                             }));
                                         }}
                                     >
-                                        remove
+                                        Remove
                                     </button>
                                 </div>
                             ))}
@@ -278,6 +415,7 @@ export default function MyProfile() {
                             >
                                 + Add Skill
                             </button>
+
                             <label>Programming Languages</label>
                             {userData.programmingLanguages.map(
                                 (lang, index) => (
@@ -285,7 +423,7 @@ export default function MyProfile() {
                                         <input
                                             type="text"
                                             value={lang}
-                                            placeholder="add language"
+                                            placeholder="Add language"
                                             onChange={(e) => {
                                                 const newLangs = [
                                                     ...userData.programmingLanguages,
@@ -313,7 +451,7 @@ export default function MyProfile() {
                                                 }));
                                             }}
                                         >
-                                            remove
+                                            Remove
                                         </button>
                                     </div>
                                 )
@@ -332,12 +470,25 @@ export default function MyProfile() {
                             >
                                 + Add Language
                             </button>
+
                             <textarea
                                 name="bio"
                                 placeholder="Bio"
                                 value={userData.bio}
                                 onChange={handleUserChange}
                             />
+                            <label>Resume</label>
+                            <input
+                                type="file"
+                                accept=".pdf,.doc,.docx"
+                                onChange={(e) =>
+                                    setResumeFile(e.target.files[0])
+                                }
+                            />
+                            <button type="button" onClick={handleResumeUpload}>
+                                Upload Resume
+                            </button>
+                            {resumeStatus && <p>{resumeStatus}</p>}
                         </>
                     )}
                     {error && <p className="error">{error}</p>}
